@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacCraft — Лучшие визуалы</title>
+    <style>
+        :root {
+            --accent-main: #d946ef;
+            --accent-secondary: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.15);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #060518 0%, #0f0a26 50%, #03020c 100%);
+            background-attachment: fixed; color: #e2e8f0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; overflow: hidden;
+        }
+
+        #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 600px; height: 600px; background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 70%); z-index: -2; transition: background 0.5s ease; }
+
+        /* Кнопка с обновленной иконкой */
+        .theme-toggle-btn {
+            position: fixed; top: 25px; left: 25px; width: 46px; height: 46px; background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .theme-toggle-btn:hover { border-color: var(--accent-main); transform: scale(1.05) rotate(45deg); box-shadow: 0 0 15px var(--accent-glow); }
+        .theme-toggle-btn svg { width: 22px; height: 22px; fill: none; stroke: var(--accent-main); stroke-width: 2; transition: stroke 0.3s ease; }
+
+        .theme-sidebar {
+            position: fixed; top: 0; left: -320px; width: 280px; height: 100vh; background: rgba(10, 8, 22, 0.75);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 99; padding: 90px 20px 30px 20px; box-shadow: 20px 0 40px rgba(0,0,0,0.5);
+            transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1); display: flex; flex-direction: column; gap: 24px; text-align: left;
+        }
+        .theme-sidebar.open { left: 0; }
+        .sidebar-section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 12px; }
+
+        .preset-list { display: flex; flex-direction: column; gap: 8px; }
+        .preset-btn {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 12px 16px;
+            border-radius: 10px; color: #cbd5e1; cursor: pointer; text-align: left; font-weight: 600;
+            font-size: 14px; display: flex; align-items: center; gap: 12px; transition: all 0.2s ease; width: 100%; box-sizing: border-box;
+        }
+        .preset-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .preset-btn.active { border-color: var(--accent-main); background: rgba(255,255,255,0.04); color: var(--accent-main); }
+        .preset-color-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        .custom-color-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; }
+        .custom-color-box span { font-size: 14px; font-weight: 600; color: #cbd5e1; }
+        .color-picker-input { -webkit-appearance: none; appearance: none; width: 40px; height: 32px; background: none; border: none; cursor: pointer; }
+        .color-picker-input::-webkit-color-swatch { border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); }
+
+        .menu-container { text-align: center; z-index: 1; width: 90%; max-width: 500px; }
+        h1 { font-size: 54px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(45deg, var(--accent-main), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; filter: drop-shadow(0 10px 20px var(--accent-glow)); transition: all 0.3s ease; }
+        .subtitle { color: #64748b; font-size: 16px; margin-bottom: 40px; font-weight: 500; }
+
+        .menu-buttons { display: flex; flex-direction: column; gap: 16px; }
+        .menu-btn { display: flex; align-items: center; justify-content: space-between; padding: 20px 26px; font-size: 18px; font-weight: 700; color: #ffffff; text-decoration: none; background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+        .menu-btn:hover { transform: translateY(-3px); border-color: var(--accent-main); box-shadow: 0 12px 30px var(--accent-glow); color: var(--accent-main); }
+        .btn-arrow { font-size: 20px; opacity: 0.4; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .menu-btn:hover .btn-arrow { transform: translateX(4px); opacity: 1; color: var(--accent-main); }
+
+        @media (max-width: 600px) { h1 { font-size: 42px; } .menu-btn { padding: 18px 22px; font-size: 16px; } }
+    </style>
+</head>
+<body>
+
+    <div class="theme-toggle-btn" id="sidebarToggle" title="Настройка цвета меню">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    </div>
+
+    <div class="theme-sidebar" id="themeSidebar">
+        <div>
+            <div class="sidebar-section-title">Готовые темы</div>
+            <div class="preset-list">
+                <button class="preset-btn" id="p1" data-main="#d946ef" data-sec="#8b5cf6" data-glow="rgba(139, 92, 246, 0.15)">
+                    <div class="preset-color-dot" style="background: #d946ef;"></div> Неоновый Плинтус
+                </button>
+                <button class="preset-btn" id="p2" data-main="#00f2fe" data-sec="#0095ff" data-glow="rgba(0, 242, 254, 0.15)">
+                    <div class="preset-color-dot" style="background: #00f2fe;"></div> Бирюзовый Космос
+                </button>
+                <button class="preset-btn" id="p3" data-main="#10b981" data-sec="#059669" data-glow="rgba(16, 185, 129, 0.15)">
+                    <div class="preset-color-dot" style="background: #10b981;"></div> Изумрудный FPS
+                </button>
+                <button class="preset-btn" id="p4" data-main="#ef4444" data-sec="#f59e0b" data-glow="rgba(239, 68, 68, 0.15)">
+                    <div class="preset-color-dot" style="background: #ef4444;"></div> Огненный Анархо
+                </button>
+            </div>
+        </div>
+        <div>
+            <div class="sidebar-section-title">Свой собственный цвет</div>
+            <div class="custom-color-box">
+                <span>Выбрать на палитре</span>
+                <input type="color" id="customColorPicker" class="color-picker-input" value="#d946ef">
+            </div>
+        </div>
+    </div>
+
+    <canvas id="particles-js"></canvas>
+    <div class="bg-glow-1"></div>
+
+    <div class="menu-container">
+        <h1>MacCraft</h1>
+        <div class="subtitle">Выберите визуальное оформление для сборки</div>
+        <div class="menu-buttons">
+            <a href="plintus.html" class="menu-btn"><span>Plintus Visual</span><span class="btn-arrow">→</span></a>
+            <a href="enough.html" class="menu-btn"><span>Enough Visual</span><span class="btn-arrow">→</span></a>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('themeSidebar');
+        toggleBtn.addEventListener('click', (e) => { sidebar.classList.toggle('open'); e.stopPropagation(); });
+        document.addEventListener('click', (e) => { if (!sidebar.contains(e.target) && e.target !== toggleBtn) sidebar.classList.remove('open'); });
+
+        const canvas = document.getElementById('particles-js');
+        const ctx = canvas.getContext('2d');
+        let particlesArray; let particleColor = 'rgba(217, 70, 239, 0.35)';
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        let mouse = { x: null, y: null, radius: 100 };
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+
+        class Particle {
+            constructor(x, y, speedY, speedX, size) { this.x = x; this.y = y; this.speedY = speedY; this.speedX = speedX; this.size = size; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = particleColor; ctx.fill(); }
+            update() {
+                this.y += this.speedY; this.x += this.speedX;
+                if (this.y > canvas.height) { this.y = 0 - this.size; this.x = Math.random() * canvas.width; }
+                if (this.x > canvas.width || this.x < 0) this.x = Math.random() * canvas.width;
+                if (mouse.x && mouse.y) {
+                    let dx = mouse.x - this.x; let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= dx * force * 0.05; this.y -= dy * force * 0.05;
+                    }
+                }
+                this.draw();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.width * canvas.height) / 12000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 0.4 + 0.2, (Math.random() * 0.2) - 0.1, Math.random() * 2.2 + 0.8));
+            }
+        }
+
+        function animate() { ctx.clearRect(0, 0, innerWidth, innerHeight); for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); } requestAnimationFrame(animate); }
+
+        const presetBtns = document.querySelectorAll('.preset-btn');
+        const customColorPicker = document.getElementById('customColorPicker');
+
+        function updateSiteTheme(main, sec, glow, save = true) {
+            document.documentElement.style.setProperty('--accent-main', main);
+            document.documentElement.style.setProperty('--accent-secondary', sec);
+            document.documentElement.style.setProperty('--accent-glow', glow);
+            particleColor = main.startsWith('#') ? hexToRgba(main, 0.35) : main;
+            if(save) {
+                localStorage.setItem('maccraft_theme_main', main);
+                localStorage.setItem('maccraft_theme_sec', sec);
+                localStorage.setItem('maccraft_theme_glow', glow);
+            }
+        }
+
+        function hexToRgba(hex, alpha) {
+            let c = hex.substring(1).split('');
+            if(c.length == 3){ c = [c[0], c[0], c[1], c[1], c[2], c[2]]; }
+            c = '0x'+c.join('');
+            return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+','+alpha+')';
+        }
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateSiteTheme(btn.dataset.main, btn.dataset.sec, btn.dataset.glow);
+                customColorPicker.value = btn.dataset.main;
+            });
+        });
+
+        customColorPicker.addEventListener('input', (e) => {
+            presetBtns.forEach(b => b.classList.remove('active'));
+            const hex = e.target.value;
+            updateSiteTheme(hex, hex, hexToRgba(hex, 0.15));
+        });
+
+        const savedMain = localStorage.getItem('maccraft_theme_main');
+        const savedSec = localStorage.getItem('maccraft_theme_sec');
+        const savedGlow = localStorage.getItem('maccraft_theme_glow');
+
+        if (savedMain && savedSec && savedGlow) {
+            updateSiteTheme(savedMain, savedSec, savedGlow, false);
+            customColorPicker.value = savedMain;
+            presetBtns.forEach(b => {
+                if(b.dataset.main === savedMain) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+        } else {
+            document.getElementById('p1').classList.add('active');
+        }
+
+        initParticles(); animate();
+    </script>
+</body>
+</html>
